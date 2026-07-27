@@ -2,19 +2,19 @@
 
 namespace Gsferro\FilamentOdometerEasy;
 
-use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
-use Filament\Support\Facades\FilamentIcon;
-use Illuminate\Filesystem\Filesystem;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Gsferro\FilamentOdometerEasy\Testing\TestsFilamentOdometerEasy;
+use Gsferro\OdometerEasy\Providers\OdometerEasyServiceProvider;
 use Livewire\Features\SupportTesting\Testable;
+use ReflectionClass;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Gsferro\FilamentOdometerEasy\Commands\FilamentOdometerEasyCommand;
-use Gsferro\FilamentOdometerEasy\Testing\TestsFilamentOdometerEasy;
 
 class FilamentOdometerEasyServiceProvider extends PackageServiceProvider
 {
@@ -30,63 +30,88 @@ class FilamentOdometerEasyServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package->name(static::$name)
-            ->hasCommands($this->getCommands())
+            ->hasConfigFile()
+            ->hasTranslations()
+            ->hasViews(static::$viewNamespace)
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
-                    ->publishMigrations()
-                    ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('gsferro/filament-odometer-easy');
             });
-
-        $configFileName = $package->shortName();
-
-        if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
-            $package->hasConfigFile();
-        }
-
-        if (file_exists($package->basePath('/../database/migrations'))) {
-            $package->hasMigrations($this->getMigrations());
-        }
-
-        if (file_exists($package->basePath('/../resources/lang'))) {
-            $package->hasTranslations();
-        }
-
-        if (file_exists($package->basePath('/../resources/views'))) {
-            $package->hasViews(static::$viewNamespace);
-        }
     }
-
-    public function packageRegistered(): void {}
 
     public function packageBooted(): void
     {
-        // Asset Registration
+        // Assets do driver ativo, copiados para public/ pelo comando
+        // filament:assets e carregados em todos os painéis.
         FilamentAsset::register(
             $this->getAssets(),
             $this->getAssetPackageName()
         );
 
-        FilamentAsset::registerScriptData(
-            $this->getScriptData(),
-            $this->getAssetPackageName()
-        );
-
-        // Icon Registration
-        FilamentIcon::register($this->getIcons());
-
-        // Handle Stubs
-        if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
-                $this->publishes([
-                    $file->getRealPath() => base_path("stubs/filament-odometer-easy/{$file->getFilename()}"),
-                ], 'filament-odometer-easy-stubs');
-            }
-        }
+        // Somente para o driver "odometer": o odometer-easy.js depende do
+        // jQuery, que o Filament não carrega por padrão.
+        $this->registerJqueryRenderHook();
 
         // Testing
         Testable::mixin(new TestsFilamentOdometerEasy);
+    }
+
+    protected function getDriver(): string
+    {
+        return config('filament-odometer-easy.driver', 'number-flow');
+    }
+
+    /**
+     * @return array<Asset>
+     */
+    protected function getAssets(): array
+    {
+        if ($this->getDriver() === 'odometer') {
+            $publicPath = $this->getOdometerEasyPublicPath();
+
+            return [
+                Css::make('odometer-easy-theme', "{$publicPath}/odometer/themes/{$this->getThemeFileName()}"),
+                Js::make('odometer', "{$publicPath}/odometer/odometer.js"),
+                Js::make('odometer-easy', "{$publicPath}/odometer-easy.js"),
+            ];
+        }
+
+        // number-flow (padrão): bundle próprio do pacote, sem dependências.
+        return [
+            Js::make('filament-odometer-easy', __DIR__ . '/../resources/dist/filament-odometer-easy.js')->module(),
+        ];
+    }
+
+    protected function registerJqueryRenderHook(): void
+    {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            function (): string {
+                // Avaliado apenas na renderização, para respeitar overrides
+                // feitos via FilamentOdometerEasyPlugin depois do boot.
+                if ($this->getDriver() !== 'odometer') {
+                    return '';
+                }
+
+                if (! config('filament-odometer-easy.odometer.jquery.enabled', true)) {
+                    return '';
+                }
+
+                $src = config('filament-odometer-easy.odometer.jquery.src');
+
+                if (blank($src)) {
+                    return '';
+                }
+
+                $integrity = config('filament-odometer-easy.odometer.jquery.integrity');
+                $attributes = filled($integrity)
+                    ? sprintf(' integrity="%s" crossorigin="anonymous"', e($integrity))
+                    : '';
+
+                return sprintf('<script src="%s"%s></script>', e($src), $attributes);
+            }
+        );
     }
 
     protected function getAssetPackageName(): ?string
@@ -95,58 +120,22 @@ class FilamentOdometerEasyServiceProvider extends PackageServiceProvider
     }
 
     /**
-     * @return array<Asset>
+     * Diretório src/public do pacote gsferro/odometer-easy, resolvido pela
+     * própria classe para não depender do caminho do vendor.
      */
-    protected function getAssets(): array
+    protected function getOdometerEasyPublicPath(): string
     {
-        return [
-            // AlpineComponent::make('filament-odometer-easy', __DIR__ . '/../resources/dist/components/filament-odometer-easy.js'),
-            // Css::make('filament-odometer-easy-styles', __DIR__ . '/../resources/dist/filament-odometer-easy.css'),
-            // Js::make('filament-odometer-easy-scripts', __DIR__ . '/../resources/dist/filament-odometer-easy.js'),
-        ];
+        $srcPath = dirname((new ReflectionClass(OdometerEasyServiceProvider::class))->getFileName(), 2);
+
+        return "{$srcPath}/public";
     }
 
-    /**
-     * @return array<class-string>
-     */
-    protected function getCommands(): array
+    protected function getThemeFileName(): string
     {
-        return [
-            FilamentOdometerEasyCommand::class,
-        ];
-    }
+        $theme = config('filament-odometer-easy.odometer.theme', 'default') ?? 'default';
 
-    /**
-     * @return array<string>
-     */
-    protected function getIcons(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string>
-     */
-    protected function getRoutes(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function getScriptData(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string>
-     */
-    protected function getMigrations(): array
-    {
-        return [
-            'create_filament-odometer-easy_table',
-        ];
+        return $theme === 'default'
+            ? 'odometer.css'
+            : "odometer-theme-{$theme}.css";
     }
 }

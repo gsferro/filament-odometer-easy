@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="art/logo.png" alt="filament-odometer-easy">
+    <img src="/art/logo.png" alt="filament-odometer-easy">
 </p>
 
 <p align="center">
@@ -26,15 +26,15 @@ Contadores animados para o **Filament v5** — tabelas, infolists e widgets de e
 
 **`OdometerStat` no dashboard** — com `poll`, os contadores re-animam sozinhos a cada atualização de valor:
 
-![OdometerStat com polling](art/OdometerStat.gif)
+![OdometerStat com polling](/art/OdometerStat.gif)
 
 **`OdometerColumn` em tabelas** — animação no load, na ordenação e na troca de página:
 
-![OdometerColumn em tabela](art/OdometerColumn.gif)
+![OdometerColumn em tabela](/art/OdometerColumn.gif)
 
 **`OdometerEntry` em infolists e `OdometerNavigationBadge` em menus**:
 
-![OdometerEntry em infolist e navigation badge](art/odometer.gif)
+![OdometerEntry em infolist e navigation badge](/art/odometer.gif)
 
 ## Componentes
 

@@ -13,7 +13,10 @@ Primeira release. 🎉
 
 ### Drivers
 
-- **number-flow** (padrão): web component sem dependências, bundlado no pacote (~16 KB), com formatação via `Intl.NumberFormat`, suporte a locale (`pt-BR`), acessibilidade (`prefers-reduced-motion`) e re-animação a cada atualização de valor — o mesmo efeito do "Items found" de filamentphp.com/plugins
+- **number-flow** (padrão): web component sem dependências, bundlado no pacote (~17 KB), com formatação via `Intl.NumberFormat`, suporte a locale (`pt-BR`) e acessibilidade (`prefers-reduced-motion`) — o mesmo efeito do "Items found" de filamentphp.com/plugins
+- Animação de entrada garantida: exibe 0 e, após um `delay` configurável (500ms), anima até o valor
+- Re-animação a cada atualização de valor (Livewire poll/morph) via `MutationObserver` nos data-attributes
+- Velocidade da animação controlável com `duration` (config, plugin ou `->duration()` por componente)
 - **odometer** (secundário): efeito clássico do odometer.js via `gsferro/odometer-easy`, com 7 temas visuais e injeção automática do jQuery nos painéis
 
 ### Configuração

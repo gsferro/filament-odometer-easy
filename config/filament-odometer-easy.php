@@ -35,11 +35,20 @@ return [
     |          Ex.: ['style' => 'currency', 'currency' => 'BRL']
     |          Ex.: ['minimumFractionDigits' => 2]
     |
+    | delay:   espera (ms) após o componente carregar antes de animar de 0
+    |          até o valor no primeiro render. Não afeta atualizações
+    |          posteriores (poll/Livewire), que animam imediatamente.
+    |
+    | duration: velocidade da animação em ms (quanto maior, mais lenta).
+    |           null usa os timings padrão do number-flow (~900ms).
+    |
     */
 
     'number-flow' => [
         'locales' => null,
         'format' => null,
+        'delay' => 500,
+        'duration' => null,
     ],
 
     /*

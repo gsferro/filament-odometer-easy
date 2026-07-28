@@ -20,6 +20,20 @@ Contadores animados para o **Filament v5** — tabelas, infolists e widgets de e
 
 É o mesmo efeito do contador **"Items found"** da página oficial [filamentphp.com/plugins](https://filamentphp.com/plugins), pronto para os seus dashboards e métricas em tempo real.
 
+## 🎬 Demo
+
+**`OdometerStat` no dashboard** — com `poll`, os contadores re-animam sozinhos a cada atualização de valor:
+
+![OdometerStat com polling](art/demo-stats.gif)
+
+**`OdometerColumn` em tabelas** — animação no load, na ordenação e na troca de página:
+
+![OdometerColumn em tabela](art/demo-table.gif)
+
+**`OdometerEntry` em infolists**:
+
+![OdometerEntry em infolist](art/demo-infolist.gif)
+
 ## Componentes
 
 | Componente | Estende | Uso |
@@ -40,6 +54,7 @@ O pacote traz dois motores e você escolhe por config ou de forma fluente no plu
 O web component [number-flow](https://github.com/barvian/number-flow) (usado pelo próprio site do Filament):
 
 - ✅ **Zero dependências** — sem jQuery, sem CDN; o bundle (~16 KB) já vem no pacote
+- ✅ **Anima do 0 no primeiro render** — exibe 0 e, após um delay configurável, anima até o valor
 - ✅ **Re-anima a cada atualização** — perfeito com Livewire, `poll()` e dashboards em tempo real
 - ✅ **Formatação nativa via `Intl.NumberFormat`** — moeda, decimais e locale (`pt-BR` → `1.000,00`)
 - ✅ **Acessível** — respeita `prefers-reduced-motion`
@@ -150,6 +165,15 @@ OdometerColumn::make('receita')
     ->format('(.ddd),dd'),
 ```
 
+### Velocidade da animação
+
+Todos os componentes aceitam `->duration()` (driver number-flow; quanto maior, mais lento):
+
+```php
+OdometerStat::make('Receita', $total)
+    ->duration(2000), // conta em câmera lenta ✨
+```
+
 Referências: [opções do Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options) · [format do odometer](https://github.com/HubSpot/odometer#api).
 
 ## Configuração
@@ -159,7 +183,9 @@ Referências: [opções do Intl.NumberFormat](https://developer.mozilla.org/en-U
 ```php
 FilamentOdometerEasyPlugin::make()
     ->locales('pt-BR')                                      // number-flow: 1.000,00
-    ->format(['style' => 'currency', 'currency' => 'BRL']), // padrão global
+    ->format(['style' => 'currency', 'currency' => 'BRL'])  // padrão global
+    ->delay(500)                                            // ms antes da animação inicial (0 → valor)
+    ->duration(1500),                                       // velocidade da animação em ms (padrão ~900ms)
 ```
 
 Para usar o motor clássico:
@@ -184,8 +210,10 @@ return [
     'driver' => 'number-flow',
 
     'number-flow' => [
-        'locales' => null, // ex.: 'pt-BR'; null usa o locale do navegador
-        'format' => null,  // ex.: ['style' => 'currency', 'currency' => 'BRL']
+        'locales' => null,  // ex.: 'pt-BR'; null usa o locale do navegador
+        'format' => null,   // ex.: ['style' => 'currency', 'currency' => 'BRL']
+        'delay' => 500,     // ms antes da animação inicial: exibe 0 e anima até o valor
+        'duration' => null, // velocidade da animação em ms; null usa o padrão (~900ms)
     ],
 
     'odometer' => [
@@ -204,9 +232,12 @@ return [
 ## Como funciona por baixo dos panos
 
 - **number-flow**: o pacote já entrega o web component `<number-flow>` bundlado
-  (`resources/dist/filament-odometer-easy.js`, registrado como ES module via `FilamentAsset`).
-  A view Blade renderiza o elemento e o Alpine (que o Filament já carrega) dispara
-  `$el.update(valor)` — exatamente a técnica usada em filamentphp.com/plugins.
+  (`resources/dist/filament-odometer-easy.js`, registrado como ES module via `FilamentAsset`),
+  o mesmo usado em filamentphp.com/plugins. A view Blade renderiza o elemento com
+  `data-value`/`data-format`/`data-locales` e o bundle o inicializa: exibe 0, espera o
+  `delay` e anima até o valor. Um `MutationObserver` acompanha as mudanças de `data-value`
+  feitas pelo morph do Livewire (poll, refresh) e re-anima do valor atual para o novo —
+  sem depender de `x-init`, que não roda de novo quando o Livewire preserva o elemento.
 - **odometer**: os assets (tema css, `odometer.js`, `odometer-easy.js`) são servidos
   direto do vendor do `gsferro/odometer-easy` via `FilamentAsset`, e o jQuery é injetado
   por render hook no `<head>` dos painéis.

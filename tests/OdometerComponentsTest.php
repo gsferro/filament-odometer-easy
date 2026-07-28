@@ -24,8 +24,9 @@ it('renders a number-flow element through the facade', function () {
         ->toBeInstanceOf(HtmlString::class)
         ->and($html->toHtml())
         ->toContain('<number-flow')
-        ->toContain('update(1500)')
-        ->toContain('>1500</number-flow>');
+        ->toContain('data-value="1500"')
+        ->toContain('data-delay="500"')
+        ->toContain('>0</number-flow>');
 });
 
 it('passes locales and intl format options to number-flow', function () {
@@ -37,13 +38,36 @@ it('passes locales and intl format options to number-flow', function () {
     $html = FilamentOdometerEasy::render(99.9)->toHtml();
 
     expect($html)
-        ->toContain("locales = 'pt-BR'")
+        ->toContain('data-locales="pt-BR"')
         ->toContain('currency')
         ->toContain('BRL');
 });
 
+it('applies a custom initial animation delay', function () {
+    config(['filament-odometer-easy.number-flow.delay' => 1000]);
+
+    expect(FilamentOdometerEasy::render(10)->toHtml())
+        ->toContain('data-delay="1000"');
+
+    expect(FilamentOdometerEasy::renderNumberFlow(10, delay: 50)->toHtml())
+        ->toContain('data-delay="50"');
+});
+
 it('normalizes non numeric values to zero on number-flow', function () {
-    expect(FilamentOdometerEasy::render(null)->toHtml())->toContain('update(0)');
+    expect(FilamentOdometerEasy::render(null)->toHtml())->toContain('data-value="0"');
+});
+
+it('controls the animation speed through the duration option', function () {
+    expect(FilamentOdometerEasy::render(10)->toHtml())
+        ->not->toContain('data-duration');
+
+    config(['filament-odometer-easy.number-flow.duration' => 2000]);
+
+    expect(FilamentOdometerEasy::render(10)->toHtml())
+        ->toContain('data-duration="2000"');
+
+    expect(OdometerColumn::make('total')->duration(750)->formatState(7)->toHtml())
+        ->toContain('data-duration="750"');
 });
 
 /*
@@ -100,7 +124,7 @@ it('formats the state of an odometer column with the default driver', function (
         ->toBeInstanceOf(HtmlString::class)
         ->and($formatted->toHtml())
         ->toContain('<number-flow')
-        ->toContain('update(1234)');
+        ->toContain('data-value="1234"');
 });
 
 it('passes intl format options from the column to number-flow', function () {
@@ -128,7 +152,7 @@ it('formats the state of an odometer entry with the default driver', function ()
 
     expect((string) $formatted)
         ->toContain('<number-flow')
-        ->toContain('update(555)');
+        ->toContain('data-value="555"');
 });
 
 it('formats the state of an odometer entry with the odometer driver', function () {
@@ -151,7 +175,7 @@ it('renders the stat value with the default driver', function () {
         ->toBeInstanceOf(HtmlString::class)
         ->and($value->toHtml())
         ->toContain('<number-flow')
-        ->toContain('update(9876)');
+        ->toContain('data-value="9876"');
 });
 
 it('renders the stat value with the odometer driver', function () {

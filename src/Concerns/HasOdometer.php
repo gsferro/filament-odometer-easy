@@ -10,6 +10,8 @@ trait HasOdometer
 {
     protected string | array | Closure | null $odometerFormat = null;
 
+    protected int | Closure | null $odometerDuration = null;
+
     /**
      * Formato do contador, de acordo com o driver:
      * - number-flow: array com opções do Intl.NumberFormat,
@@ -35,8 +37,29 @@ trait HasOdometer
         return $this->evaluate($this->odometerFormat);
     }
 
+    /**
+     * Velocidade da animação em ms (quanto maior, mais lenta) — driver
+     * number-flow. Quando não informado, usa a config; null usa os timings
+     * padrão do number-flow (~900ms).
+     */
+    public function duration(int | Closure | null $duration): static
+    {
+        $this->odometerDuration = $duration;
+
+        return $this;
+    }
+
+    public function getOdometerDuration(): ?int
+    {
+        return $this->evaluate($this->odometerDuration);
+    }
+
     protected function renderOdometer(mixed $value): HtmlString
     {
-        return app(FilamentOdometerEasy::class)->render($value, $this->getOdometerFormat());
+        return app(FilamentOdometerEasy::class)->render(
+            $value,
+            $this->getOdometerFormat(),
+            duration: $this->getOdometerDuration(),
+        );
     }
 }

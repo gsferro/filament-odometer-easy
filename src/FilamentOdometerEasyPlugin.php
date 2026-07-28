@@ -43,6 +43,28 @@ class FilamentOdometerEasyPlugin implements Plugin
     }
 
     /**
+     * Espera (ms) antes da animação inicial do number-flow: o componente
+     * exibe 0 e, após o delay, anima até o valor real.
+     */
+    public function delay(int $delay): static
+    {
+        config(['filament-odometer-easy.number-flow.delay' => $delay]);
+
+        return $this;
+    }
+
+    /**
+     * Velocidade da animação do number-flow em ms (quanto maior, mais lenta).
+     * null usa os timings padrão do number-flow (~900ms).
+     */
+    public function duration(?int $duration): static
+    {
+        config(['filament-odometer-easy.number-flow.duration' => $duration]);
+
+        return $this;
+    }
+
+    /**
      * Formato padrão para todos os componentes, de acordo com o driver:
      * - array => opções Intl.NumberFormat do number-flow,
      *   ex.: ['style' => 'currency', 'currency' => 'BRL']

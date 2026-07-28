@@ -1,5 +1,7 @@
 <?php
 
+use Filament\Infolists\Infolist;
+use Filament\Schemas\Schema;
 use Gsferro\FilamentOdometerEasy\Facades\FilamentOdometerEasy;
 use Gsferro\FilamentOdometerEasy\Infolists\Components\OdometerEntry;
 use Gsferro\FilamentOdometerEasy\Navigation\OdometerNavigationBadge;
@@ -13,9 +15,9 @@ use Illuminate\Support\HtmlString;
  */
 function makeEntryContainer(): mixed
 {
-    return class_exists(\Filament\Schemas\Schema::class)
-        ? \Filament\Schemas\Schema::make()
-        : \Filament\Infolists\Infolist::make();
+    return class_exists(Schema::class)
+        ? Schema::make()
+        : Infolist::make();
 }
 
 /*

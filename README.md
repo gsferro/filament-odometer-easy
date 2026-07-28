@@ -24,15 +24,15 @@ Contadores animados para o **Filament v5** — tabelas, infolists e widgets de e
 
 **`OdometerStat` no dashboard** — com `poll`, os contadores re-animam sozinhos a cada atualização de valor:
 
-![OdometerStat com polling](art/demo-stats.gif)
+![OdometerStat com polling](art/OdometerStat.gif)
 
 **`OdometerColumn` em tabelas** — animação no load, na ordenação e na troca de página:
 
-![OdometerColumn em tabela](art/demo-table.gif)
+![OdometerColumn em tabela](art/OdometerColumn.gif)
 
 **`OdometerEntry` em infolists**:
 
-![OdometerEntry em infolist](art/demo-infolist.gif)
+![OdometerEntry em infolist](art/OdometerEntry.gif)
 
 ## Componentes
 

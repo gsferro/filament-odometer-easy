@@ -69,6 +69,15 @@ const initialDelay = (el) => {
     return Number.isFinite(delay) && delay >= 0 ? delay : 0
 }
 
+// data-start define de onde a animação inicial parte (padrão 0). Usado nos
+// navigation badges re-renderizados pelo Livewire, para animar do valor
+// anterior até o novo em vez de recomeçar do zero.
+const startValue = (el) => {
+    const start = Number(el.getAttribute('data-start'))
+
+    return Number.isFinite(start) ? start : 0
+}
+
 const boot = (el) => {
     if (el.__odometerEasyBooted) {
         return
@@ -79,8 +88,9 @@ const boot = (el) => {
     configure(el)
 
     // O primeiro update() do number-flow define o estado inicial sem animar:
-    // partimos de 0 para que o próximo update() anime até o valor real.
-    el.update(0)
+    // partimos de data-start (0 por padrão) para que o próximo update()
+    // anime até o valor real.
+    el.update(startValue(el))
 
     setTimeout(() => el.update(targetValue(el)), initialDelay(el))
 
@@ -95,25 +105,101 @@ const boot = (el) => {
     })
 }
 
+// Navigation badges (OdometerNavigationBadge): a API do Filament
+// (getNavigationBadge/NavigationItem::badge) só aceita string e escapa HTML,
+// então o PHP envolve o valor com U+2060 (word joiner, invisível) e este
+// script troca o texto do .fi-badge-label por um <number-flow>, com a config
+// global exposta em window.filamentOdometerEasy pelo service provider.
+const BADGE_PATTERN = /^\u2060(-?\d+(?:\.\d+)?)\u2060$/
+
+const upgradeBadgeLabel = (label) => {
+    const match = BADGE_PATTERN.exec(label.textContent.trim())
+
+    if (!match) {
+        return
+    }
+
+    const config = window.filamentOdometerEasy ?? {}
+    const el = document.createElement('number-flow')
+
+    el.className = 'fi-odometer-easy'
+    el.setAttribute('data-value', match[1])
+
+    // Re-render do badge (Livewire morph) volta a ser texto marcado: anima
+    // do valor anterior até o novo imediatamente, em vez de 0 -> novo.
+    const previous = label.__odometerEasyValue
+
+    el.setAttribute('data-delay', previous === undefined ? (config.delay ?? 500) : 0)
+
+    if (previous !== undefined) {
+        el.setAttribute('data-start', previous)
+    }
+
+    if (config.duration != null) {
+        el.setAttribute('data-duration', config.duration)
+    }
+
+    if (config.locales != null) {
+        el.setAttribute(
+            'data-locales',
+            typeof config.locales === 'string' ? config.locales : JSON.stringify(config.locales),
+        )
+    }
+
+    if (config.format != null) {
+        el.setAttribute('data-format', JSON.stringify(config.format))
+    }
+
+    label.__odometerEasyValue = Number(match[1])
+    label.replaceChildren(el)
+
+    boot(el)
+}
+
+const upgradeBadgeLabelOf = (node) => {
+    const label = node.parentElement?.closest('.fi-badge-label')
+
+    if (label) {
+        upgradeBadgeLabel(label)
+    }
+}
+
 const scan = (root) => {
     if (root.matches?.('number-flow[data-value]')) {
         boot(root)
     }
 
     root.querySelectorAll?.('number-flow[data-value]').forEach(boot)
+
+    if (root.matches?.('.fi-badge-label')) {
+        upgradeBadgeLabel(root)
+    }
+
+    root.querySelectorAll?.('.fi-badge-label').forEach(upgradeBadgeLabel)
 }
 
 new MutationObserver((mutations) => {
     for (const mutation of mutations) {
+        // Morph do Livewire pode só trocar o texto do badge, sem novos
+        // elementos: characterData cobre esse caso.
+        if (mutation.type === 'characterData') {
+            upgradeBadgeLabelOf(mutation.target)
+
+            continue
+        }
+
         mutation.addedNodes.forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
                 scan(node)
+            } else if (node.nodeType === Node.TEXT_NODE) {
+                upgradeBadgeLabelOf(node)
             }
         })
     }
 }).observe(document.documentElement, {
     childList: true,
     subtree: true,
+    characterData: true,
 })
 
 if (document.readyState === 'loading') {

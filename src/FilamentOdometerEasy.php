@@ -7,6 +7,12 @@ use Illuminate\Support\HtmlString;
 class FilamentOdometerEasy
 {
     /**
+     * Marcador invisível (U+2060, WORD JOINER) que identifica valores de
+     * badge de navegação a serem animados pelo JS do driver number-flow.
+     */
+    public const NAVIGATION_BADGE_MARKER = "\u{2060}";
+
+    /**
      * Renderiza o contador animado usando o driver configurado
      * (number-flow por padrão; odometer como alternativa).
      *
@@ -20,6 +26,25 @@ class FilamentOdometerEasy
         return $driver === 'odometer'
             ? $this->renderOdometer($value, is_string($format) ? $format : null, $class)
             : $this->renderNumberFlow($value, is_array($format) ? $format : null, $class, duration: $duration);
+    }
+
+    /**
+     * Valor para getNavigationBadge()/NavigationItem::badge(): a API do
+     * Filament só aceita string (HTML é escapado), então o valor é envolvido
+     * pelo marcador invisível e o JS do driver number-flow troca o texto do
+     * badge por um <number-flow> animado, com a formatação da config global.
+     *
+     * No driver odometer (sem suporte a badge), retorna o valor puro.
+     */
+    public function renderNavigationBadge(mixed $value): string
+    {
+        $value = is_numeric($value) ? $value + 0 : 0;
+
+        if (config('filament-odometer-easy.driver', 'number-flow') !== 'number-flow') {
+            return (string) $value;
+        }
+
+        return self::NAVIGATION_BADGE_MARKER . $value . self::NAVIGATION_BADGE_MARKER;
     }
 
     /**

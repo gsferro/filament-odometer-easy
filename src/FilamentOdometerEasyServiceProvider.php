@@ -53,6 +53,11 @@ class FilamentOdometerEasyServiceProvider extends PackageServiceProvider
         // jQuery, que o Filament não carrega por padrão.
         $this->registerJqueryRenderHook();
 
+        // Somente para o driver "number-flow": expõe a config global ao JS,
+        // usada nos navigation badges (OdometerNavigationBadge), que não
+        // passam por blade view do pacote.
+        $this->registerNumberFlowConfigRenderHook();
+
         // Testing
         Testable::mixin(new TestsFilamentOdometerEasy);
     }
@@ -110,6 +115,29 @@ class FilamentOdometerEasyServiceProvider extends PackageServiceProvider
                     : '';
 
                 return sprintf('<script src="%s"%s></script>', e($src), $attributes);
+            }
+        );
+    }
+
+    protected function registerNumberFlowConfigRenderHook(): void
+    {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            function (): string {
+                // Avaliado apenas na renderização, para respeitar overrides
+                // feitos via FilamentOdometerEasyPlugin depois do boot.
+                if ($this->getDriver() !== 'number-flow') {
+                    return '';
+                }
+
+                $config = json_encode([
+                    'locales' => config('filament-odometer-easy.number-flow.locales'),
+                    'format' => config('filament-odometer-easy.number-flow.format'),
+                    'delay' => config('filament-odometer-easy.number-flow.delay', 500),
+                    'duration' => config('filament-odometer-easy.number-flow.duration'),
+                ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+
+                return "<script>window.filamentOdometerEasy = {$config};</script>";
             }
         );
     }

@@ -3,6 +3,7 @@
 use Filament\Schemas\Schema;
 use Gsferro\FilamentOdometerEasy\Facades\FilamentOdometerEasy;
 use Gsferro\FilamentOdometerEasy\Infolists\Components\OdometerEntry;
+use Gsferro\FilamentOdometerEasy\Navigation\OdometerNavigationBadge;
 use Gsferro\FilamentOdometerEasy\Tables\Columns\OdometerColumn;
 use Gsferro\FilamentOdometerEasy\Widgets\OdometerStat;
 use Illuminate\Support\HtmlString;
@@ -176,6 +177,26 @@ it('renders the stat value with the default driver', function () {
         ->and($value->toHtml())
         ->toContain('<number-flow')
         ->toContain('data-value="9876"');
+});
+
+it('wraps the navigation badge value with invisible markers on number-flow', function () {
+    $marker = \Gsferro\FilamentOdometerEasy\FilamentOdometerEasy::NAVIGATION_BADGE_MARKER;
+
+    expect($marker)->toBe("\u{2060}")
+        ->and(OdometerNavigationBadge::make(1234))->toBe("{$marker}1234{$marker}")
+        ->and(OdometerNavigationBadge::make('99.9'))->toBe("{$marker}99.9{$marker}");
+});
+
+it('normalizes non numeric navigation badge values to zero', function () {
+    $marker = \Gsferro\FilamentOdometerEasy\FilamentOdometerEasy::NAVIGATION_BADGE_MARKER;
+
+    expect(OdometerNavigationBadge::make(null))->toBe("{$marker}0{$marker}");
+});
+
+it('returns a plain navigation badge value on the odometer driver', function () {
+    config(['filament-odometer-easy.driver' => 'odometer']);
+
+    expect(OdometerNavigationBadge::make(1234))->toBe('1234');
 });
 
 it('renders the stat value with the odometer driver', function () {

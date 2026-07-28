@@ -34,7 +34,7 @@ trait HasOdometer
      */
     public function getOdometerFormat(): string | array | null
     {
-        return $this->evaluate($this->odometerFormat);
+        return $this->evaluateOdometerOption($this->odometerFormat);
     }
 
     /**
@@ -51,7 +51,21 @@ trait HasOdometer
 
     public function getOdometerDuration(): ?int
     {
-        return $this->evaluate($this->odometerDuration);
+        return $this->evaluateOdometerOption($this->odometerDuration);
+    }
+
+    /**
+     * O Stat do Filament v3 não tem EvaluatesClosures (evaluate() só existe
+     * nele a partir do v4): usa evaluate() quando disponível e resolve a
+     * Closure diretamente como fallback.
+     */
+    protected function evaluateOdometerOption(mixed $option): mixed
+    {
+        if (method_exists($this, 'evaluate')) {
+            return $this->evaluate($option);
+        }
+
+        return $option instanceof Closure ? $option() : $option;
     }
 
     protected function renderOdometer(mixed $value): HtmlString

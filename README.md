@@ -18,7 +18,7 @@
 
 > 🇧🇷 Português · 🇺🇸 [English](README.en.md)
 
-Contadores animados para o **Filament v5** — tabelas, infolists e widgets de estatísticas — do jeito mais simples possível: instale, registre o plugin e use.
+Contadores animados para o **Filament v3, v4 e v5** — tabelas, infolists e widgets de estatísticas — do jeito mais simples possível: instale, registre o plugin e use.
 
 É o mesmo efeito do contador **"Items found"** da página oficial [filamentphp.com/plugins](https://filamentphp.com/plugins), pronto para os seus dashboards e métricas em tempo real.
 
@@ -70,6 +70,16 @@ O efeito clássico do [odometer.js](https://github.com/HubSpot/odometer) via [gs
 - 🎨 7 temas visuais: `default`, `car`, `digital`, `minimal`, `plaza`, `slot-machine`, `train-station`
 - ⚠️ Depende do jQuery (o plugin injeta automaticamente no `<head>` dos painéis)
 - ⚠️ Anima apenas na primeira renderização (não re-anima ao atualizar o valor)
+
+## Compatibilidade
+
+| Filament | Suporte | Observações |
+|---|---|---|
+| **5.x** | ✅ | |
+| **4.x** | ✅ | |
+| **3.x** (3.2+) | ✅ | |
+
+A mesma versão do pacote atende as três — o Composer resolve pela versão do Filament do seu projeto. Requer PHP 8.2+.
 
 ## Instalação
 

@@ -1,12 +1,22 @@
 <?php
 
-use Filament\Schemas\Schema;
 use Gsferro\FilamentOdometerEasy\Facades\FilamentOdometerEasy;
 use Gsferro\FilamentOdometerEasy\Infolists\Components\OdometerEntry;
 use Gsferro\FilamentOdometerEasy\Navigation\OdometerNavigationBadge;
 use Gsferro\FilamentOdometerEasy\Tables\Columns\OdometerColumn;
 use Gsferro\FilamentOdometerEasy\Widgets\OdometerStat;
 use Illuminate\Support\HtmlString;
+
+/**
+ * Container para entries de infolist: Schema no Filament v4+,
+ * Infolist no v3.
+ */
+function makeEntryContainer(): mixed
+{
+    return class_exists(\Filament\Schemas\Schema::class)
+        ? \Filament\Schemas\Schema::make()
+        : \Filament\Infolists\Infolist::make();
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -148,7 +158,7 @@ it('formats the state of an odometer column with the odometer driver', function 
 
 it('formats the state of an odometer entry with the default driver', function () {
     $formatted = OdometerEntry::make('total')
-        ->container(Schema::make())
+        ->container(makeEntryContainer())
         ->formatState(555);
 
     expect((string) $formatted)
@@ -160,7 +170,7 @@ it('formats the state of an odometer entry with the odometer driver', function (
     config(['filament-odometer-easy.driver' => 'odometer']);
 
     $formatted = OdometerEntry::make('total')
-        ->container(Schema::make())
+        ->container(makeEntryContainer())
         ->format('(,ddd)')
         ->formatState(555);
 

@@ -112,13 +112,37 @@ const boot = (el) => {
 // global exposta em window.filamentOdometerEasy pelo service provider.
 const BADGE_PATTERN = /^\u2060(-?\d+(?:\.\d+)?)\u2060$/
 
-const upgradeBadgeLabel = (label) => {
-    const match = BADGE_PATTERN.exec(label.textContent.trim())
+// O markup interno varia entre versões do Filament (v3: texto direto no
+// .fi-badge; v4/v5: .fi-badge-label): desce até o elemento mais profundo
+// que ainda contém o valor marcado.
+const findMarkedElement = (root) => {
+    if (!BADGE_PATTERN.test(root.textContent.trim())) {
+        return null
+    }
 
-    if (!match) {
+    let el = root
+
+    for (;;) {
+        const child = [...el.children].find(
+            (candidate) => BADGE_PATTERN.test(candidate.textContent.trim()),
+        )
+
+        if (!child) {
+            return el
+        }
+
+        el = child
+    }
+}
+
+const upgradeBadge = (badge) => {
+    const label = findMarkedElement(badge)
+
+    if (!label) {
         return
     }
 
+    const match = BADGE_PATTERN.exec(label.textContent.trim())
     const config = window.filamentOdometerEasy ?? {}
     const el = document.createElement('number-flow')
 
@@ -127,7 +151,8 @@ const upgradeBadgeLabel = (label) => {
 
     // Re-render do badge (Livewire morph) volta a ser texto marcado: anima
     // do valor anterior até o novo imediatamente, em vez de 0 -> novo.
-    const previous = label.__odometerEasyValue
+    // O valor anterior fica no .fi-badge, que o morph preserva.
+    const previous = badge.__odometerEasyValue
 
     el.setAttribute('data-delay', previous === undefined ? (config.delay ?? 500) : 0)
 
@@ -150,17 +175,17 @@ const upgradeBadgeLabel = (label) => {
         el.setAttribute('data-format', JSON.stringify(config.format))
     }
 
-    label.__odometerEasyValue = Number(match[1])
+    badge.__odometerEasyValue = Number(match[1])
     label.replaceChildren(el)
 
     boot(el)
 }
 
-const upgradeBadgeLabelOf = (node) => {
-    const label = node.parentElement?.closest('.fi-badge-label')
+const upgradeBadgeOf = (node) => {
+    const badge = node.parentElement?.closest('.fi-badge')
 
-    if (label) {
-        upgradeBadgeLabel(label)
+    if (badge) {
+        upgradeBadge(badge)
     }
 }
 
@@ -171,11 +196,11 @@ const scan = (root) => {
 
     root.querySelectorAll?.('number-flow[data-value]').forEach(boot)
 
-    if (root.matches?.('.fi-badge-label')) {
-        upgradeBadgeLabel(root)
+    if (root.matches?.('.fi-badge')) {
+        upgradeBadge(root)
     }
 
-    root.querySelectorAll?.('.fi-badge-label').forEach(upgradeBadgeLabel)
+    root.querySelectorAll?.('.fi-badge').forEach(upgradeBadge)
 }
 
 new MutationObserver((mutations) => {
@@ -183,7 +208,7 @@ new MutationObserver((mutations) => {
         // Morph do Livewire pode só trocar o texto do badge, sem novos
         // elementos: characterData cobre esse caso.
         if (mutation.type === 'characterData') {
-            upgradeBadgeLabelOf(mutation.target)
+            upgradeBadgeOf(mutation.target)
 
             continue
         }
@@ -192,7 +217,7 @@ new MutationObserver((mutations) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
                 scan(node)
             } else if (node.nodeType === Node.TEXT_NODE) {
-                upgradeBadgeLabelOf(node)
+                upgradeBadgeOf(node)
             }
         })
     }

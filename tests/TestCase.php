@@ -35,16 +35,20 @@ class TestCase extends Orchestra
             InfolistsServiceProvider::class,
             LivewireServiceProvider::class,
             NotificationsServiceProvider::class,
-            SchemasServiceProvider::class,
+            SchemasServiceProvider::class, // Filament v4+
             SupportServiceProvider::class,
             TablesServiceProvider::class,
             WidgetsServiceProvider::class,
             FilamentOdometerEasyServiceProvider::class,
         ];
 
+        // O pacote suporta Filament 3/4/5: mantém só os providers que
+        // existem na versão instalada (::class não dispara autoload).
+        $providers = array_filter($providers, fn (string $provider): bool => class_exists($provider));
+
         sort($providers);
 
-        return $providers;
+        return array_values($providers);
     }
 
     public function getEnvironmentSetUp($app): void

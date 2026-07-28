@@ -18,7 +18,7 @@
 
 > 🇺🇸 English · 🇧🇷 [Português](README.md)
 
-Animated counters for **Filament v5** — tables, infolists and stats widgets — the easiest way possible: install, register the plugin and use it.
+Animated counters for **Filament v3, v4 and v5** — tables, infolists and stats widgets — the easiest way possible: install, register the plugin and use it.
 
 It's the same effect as the **"Items found"** counter on the official [filamentphp.com/plugins](https://filamentphp.com/plugins) page, ready for your dashboards and real-time metrics.
 
@@ -70,6 +70,16 @@ The classic [odometer.js](https://github.com/HubSpot/odometer) effect via [gsfer
 - 🎨 7 visual themes: `default`, `car`, `digital`, `minimal`, `plaza`, `slot-machine`, `train-station`
 - ⚠️ Depends on jQuery (the plugin injects it automatically into the panels' `<head>`)
 - ⚠️ Animates only on first render (does not re-animate when the value updates)
+
+## Compatibility
+
+| Filament | Support | Notes |
+|---|---|---|
+| **5.x** | ✅ | |
+| **4.x** | ✅ | |
+| **3.x** (3.2+) | ✅ | |
+
+The same package version covers all three — Composer resolves it against your project's Filament version. Requires PHP 8.2+.
 
 ## Installation
 

@@ -180,7 +180,7 @@ it('renders the stat value with the default driver', function () {
 });
 
 it('wraps the navigation badge value with invisible markers on number-flow', function () {
-    $marker = \Gsferro\FilamentOdometerEasy\FilamentOdometerEasy::NAVIGATION_BADGE_MARKER;
+    $marker = Gsferro\FilamentOdometerEasy\FilamentOdometerEasy::NAVIGATION_BADGE_MARKER;
 
     expect($marker)->toBe("\u{2060}")
         ->and(OdometerNavigationBadge::make(1234))->toBe("{$marker}1234{$marker}")
@@ -188,7 +188,7 @@ it('wraps the navigation badge value with invisible markers on number-flow', fun
 });
 
 it('normalizes non numeric navigation badge values to zero', function () {
-    $marker = \Gsferro\FilamentOdometerEasy\FilamentOdometerEasy::NAVIGATION_BADGE_MARKER;
+    $marker = Gsferro\FilamentOdometerEasy\FilamentOdometerEasy::NAVIGATION_BADGE_MARKER;
 
     expect(OdometerNavigationBadge::make(null))->toBe("{$marker}0{$marker}");
 });

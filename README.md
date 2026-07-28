@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="logo.png" alt="filament-odometer-easy">
+    <img src="art/logo.png" alt="filament-odometer-easy">
 </p>
 
 <p align="center">
@@ -16,6 +16,8 @@
 
 # Filament Odometer Easy
 
+> 🇧🇷 Português · 🇺🇸 [English](README.en.md)
+
 Contadores animados para o **Filament v5** — tabelas, infolists e widgets de estatísticas — do jeito mais simples possível: instale, registre o plugin e use.
 
 É o mesmo efeito do contador **"Items found"** da página oficial [filamentphp.com/plugins](https://filamentphp.com/plugins), pronto para os seus dashboards e métricas em tempo real.
@@ -30,9 +32,9 @@ Contadores animados para o **Filament v5** — tabelas, infolists e widgets de e
 
 ![OdometerColumn em tabela](art/OdometerColumn.gif)
 
-**`OdometerEntry` em infolists**:
+**`OdometerEntry` em infolists e `OdometerNavigationBadge` em menus**:
 
-![OdometerEntry em infolist](art/OdometerEntry.gif)
+![OdometerEntry em infolist e navigation badge](art/odometer.gif)
 
 ## Componentes
 
@@ -41,6 +43,7 @@ Contadores animados para o **Filament v5** — tabelas, infolists e widgets de e
 | `OdometerColumn` | `TextColumn` | Colunas de tabela |
 | `OdometerEntry` | `TextEntry` | Entries de infolist |
 | `OdometerStat` | `Stat` | Counts no `StatsOverviewWidget` |
+| `OdometerNavigationBadge` | — | Badge de navegação (`getNavigationBadge()`) |
 | Facade `FilamentOdometerEasy` | — | Qualquer view/blade customizado |
 
 Todos herdam **100% da API do componente base** (`sortable`, `searchable`, `label`, `description`, `color` etc.) — só o valor passa a ser animado.
@@ -134,6 +137,31 @@ protected function getStats(): array
 > [!TIP]
 > Combine com `->poll('10s')` no widget: com o driver `number-flow`,
 > o contador re-anima a cada atualização de valor. 📈
+
+### Badge de navegação (menu do painel)
+
+```php
+use Gsferro\FilamentOdometerEasy\Navigation\OdometerNavigationBadge;
+
+// no Resource (ou Page)
+public static function getNavigationBadge(): ?string
+{
+    return OdometerNavigationBadge::make(static::getModel()::count());
+}
+
+// ou em um NavigationItem customizado
+NavigationItem::make('Vendas')
+    ->badge(fn (): string => OdometerNavigationBadge::make(Venda::count())),
+```
+
+A API de navegação do Filament só aceita `string` (HTML é escapado), então o
+componente envolve o valor com um marcador invisível e o JS do pacote troca o
+texto do badge por um `<number-flow>` animado. A formatação usa a config global
+do `number-flow` (`locales`, `format`, `delay`, `duration`).
+
+> [!NOTE]
+> Disponível apenas no driver `number-flow`. No driver `odometer`,
+> o valor é exibido como texto puro, sem animação.
 
 ### Em qualquer view (facade)
 
@@ -238,6 +266,12 @@ return [
   `delay` e anima até o valor. Um `MutationObserver` acompanha as mudanças de `data-value`
   feitas pelo morph do Livewire (poll, refresh) e re-anima do valor atual para o novo —
   sem depender de `x-init`, que não roda de novo quando o Livewire preserva o elemento.
+- **Navigation badge**: `getNavigationBadge()` e `NavigationItem::badge()` são tipados
+  como `?string` e o Blade escapa o conteúdo, então não dá para retornar HTML.
+  `OdometerNavigationBadge::make()` envolve o valor com `U+2060` (word joiner, invisível);
+  o bundle detecta o marcador no `.fi-badge-label`, troca o texto por um `<number-flow>`
+  e usa a config global exposta em `window.filamentOdometerEasy` por render hook.
+  Quando o Livewire re-renderiza o badge, a animação parte do valor anterior (`data-start`).
 - **odometer**: os assets (tema css, `odometer.js`, `odometer-easy.js`) são servidos
   direto do vendor do `gsferro/odometer-easy` via `FilamentAsset`, e o jQuery é injetado
   por render hook no `<head>` dos painéis.

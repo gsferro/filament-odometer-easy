@@ -1,13 +1,18 @@
 {
     "name": "gsferro/filament-odometer-easy",
-    "description": "Widget Filament com animação de contadores Odometer para dashboards e métricas em tempo real, construído sobre o laravel-odometer-easy.",
+    "description": "Animated counters for Filament v5 — tables, infolists, stats and navigation badges — powered by number-flow (default) or odometer.js.",
     "keywords": [
         "gsferro",
         "laravel",
         "filamentphp",
         "filament",
         "filament-plugin",
-        "filament-odometer-easy"
+        "filament-odometer-easy",
+        "odometer",
+        "number-flow",
+        "counter",
+        "animation",
+        "dashboard"
     ],
     "homepage": "https://github.com/gsferro/filament-odometer-easy",
     "support": {

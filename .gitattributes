@@ -1,6 +1,10 @@
 # Path-based git attributes
 # https://www.kernel.org/pub/software/scm/git/docs/gitattributes.html
 
+# Normaliza fim de linha para LF (o fixer line_ending do Pint exige LF,
+# mesmo em checkouts Windows com core.autocrlf=true).
+* text=auto eol=lf
+
 # Ignore all test and documentation with "export-ignore".
 /.github                export-ignore
 /.gitattributes         export-ignore

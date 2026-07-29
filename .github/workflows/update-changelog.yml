@@ -7,6 +7,12 @@ on:
 permissions:
   contents: write
 
+# Serializa os runs: releases publicadas em sequência disparam workflows
+# concorrentes que colidem no push para main (cannot lock ref).
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -23,7 +29,9 @@ jobs:
       - name: Update Changelog
         uses: stefanzweifel/changelog-updater-action@a938690fad7edf25368f37e43a1ed1b34303eb36 # v1.12.0
         with:
-          latest-version: ${{ github.event.release.name }}
+          # tag_name (ex: v1.1.1), não name: o nome da release inclui o título
+          # e gera cabeçalho fora do padrão, quebrando a deduplicação.
+          latest-version: ${{ github.event.release.tag_name }}
           release-notes: ${{ github.event.release.body }}
 
       - name: Commit updated CHANGELOG

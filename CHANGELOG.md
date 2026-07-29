@@ -2,6 +2,17 @@
 
 All notable changes to `filament-odometer-easy` will be documented in this file.
 
+## v1.1.1 - 2026-07-29
+
+### Correções de CI 💚
+
+Nenhuma mudança de código do pacote — release para deixar a pipeline verde em cima das tags.
+
+- `fix-code-style` roda apenas em push de branches: em push de tag o checkout fica em detached HEAD e o `git-auto-commit-action` falhava com exit 128
+- PHPStan: ignore cirúrgico de `function.alreadyNarrowedType` em `HasOdometer` — o guard `method_exists($this, 'evaluate')` existe para o `Stat` do Filament v3 e é sempre `true` com v4/v5 instalado (`reportUnmatched: false` mantém a análise limpa em qualquer major)
+- PHPUnit: removido o bloco `<coverage>` do `phpunit.xml.dist` — nos runners o `setup-php` usa `coverage: none` e o warning de driver ausente virava falha por causa do `failOnWarning="true"` (coverage local continua disponível com `pest --coverage`)
+- `.gitattributes` normaliza fim de linha para LF, evitando falso positivo do fixer `line_ending` do Pint em checkouts Windows
+
 ## v1.1.0 - 2026-07-28
 
 ### Compatibilidade com Filament v3 e v4 🎯

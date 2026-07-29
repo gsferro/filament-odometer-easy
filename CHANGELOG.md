@@ -2,6 +2,23 @@
 
 All notable changes to `filament-odometer-easy` will be documented in this file.
 
+## v1.1.0 - Compatibilidade com Filament v3 e v4 - 2026-07-29
+
+### Compatibilidade com Filament v3 e v4 🎯
+
+- `filament/filament` agora aceita `^3.2|^4.0|^5.0` — a mesma versão do pacote atende as três majors
+- `HasOdometer` não depende mais de `evaluate()` (o `Stat` do Filament v3 não tem `EvaluatesClosures`)
+- Detecção do navigation badge no JS ficou agnóstica de markup (v3 usa `.fi-badge` com texto direto; v4/v5 usam `.fi-badge-label`)
+- Testes rodam em qualquer major (providers e containers resolvidos por `class_exists`)
+- Validado em demos reais com Filament 3.3, 4.12 e 5.7 (dashboard, tabela, infolist e navigation badge)
+
+### Novidades da v1.0.1 (docs)
+
+- `OdometerNavigationBadge` para badges de navegação animados (`getNavigationBadge()`/`NavigationItem::badge()`)
+- README em inglês (`README.en.md`) e logo
+
+**Changelog completo**: https://github.com/gsferro/filament-odometer-easy/compare/v1.0...v1.1.0
+
 ## v1.1.1 - Correções de CI - 2026-07-29
 
 ### Correções de CI 💚

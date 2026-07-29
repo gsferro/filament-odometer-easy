@@ -8,3 +8,10 @@ parameters:
         - src
         - config
     tmpDir: build/phpstan
+    ignoreErrors:
+        # method_exists($this, 'evaluate') protege o Stat do Filament v3, que não
+        # tem EvaluatesClosures; com v4/v5 instalado o guard é sempre true.
+        -
+            identifier: function.alreadyNarrowedType
+            path: src/Concerns/HasOdometer.php
+            reportUnmatched: false

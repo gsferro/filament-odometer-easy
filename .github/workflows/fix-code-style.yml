@@ -1,7 +1,11 @@
 name: fix-code-style
 
+# Somente branches: em push de tag o checkout fica em detached HEAD
+# e o git-auto-commit-action não consegue fazer push.
 on:
   push:
+    branches:
+      - '**'
     paths:
       - '**.php'
 

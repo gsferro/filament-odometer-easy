@@ -188,19 +188,48 @@ FilamentOdometerEasy::renderOdometer(1500, format: '(.ddd),dd', class: 'h3');
 
 ## Formatação
 
-O método `->format()` está disponível em todos os componentes e aceita o formato do driver ativo:
+O método `->format()` está disponível em todos os componentes e aceita o formato do driver ativo. No driver `number-flow` (padrão), passe um array com [opções do Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options) — a formatação (símbolo, separadores, casas decimais) é aplicada pelo navegador, animada dígito a dígito.
+
+### Moeda (R$, US$, €…)
+
+Por padrão o contador exibe apenas o número. Para mostrar o **símbolo da moeda**, passe um `format` com `style: currency`:
 
 ```php
-// number-flow: array com opções do Intl.NumberFormat
-OdometerColumn::make('receita')
+OdometerStat::make('Valor aprovado (projetos em andamento)', $aprovado)
     ->format(['style' => 'currency', 'currency' => 'BRL']),
+```
 
-OdometerStat::make('Conversão', $taxa)
-    ->format(['style' => 'percent', 'minimumFractionDigits' => 1]),
+> [!TIP]
+> Combine com `->locales('pt-BR')` no plugin (ou na config) para obter
+> `R$ 1.234,56` — sem locale, o navegador do usuário decide os separadores.
 
-// odometer: string data-format
-OdometerColumn::make('receita')
-    ->format('(.ddd),dd'),
+### Receitas prontas (driver `number-flow`)
+
+| Resultado (pt-BR) | `->format([...])` |
+|---|---|
+| `R$ 1.234,56` (moeda) | `['style' => 'currency', 'currency' => 'BRL']` |
+| `R$ 1.235` (moeda sem centavos) | `['style' => 'currency', 'currency' => 'BRL', 'maximumFractionDigits' => 0]` |
+| `US$ 1.234,56` / `€ 1.234,56` | `['style' => 'currency', 'currency' => 'USD']` / `'EUR'` |
+| `12,5%` (percentual) | `['style' => 'percent', 'minimumFractionDigits' => 1]` |
+| `1.234,50` (decimais fixos) | `['minimumFractionDigits' => 2, 'maximumFractionDigits' => 2]` |
+| `1,2 mi` (notação compacta) | `['notation' => 'compact']` |
+| `1.234 km` (unidades) | `['style' => 'unit', 'unit' => 'kilometer']` |
+| `+1.234` (sinal sempre visível) | `['signDisplay' => 'always']` |
+| `1234` (sem agrupamento) | `['useGrouping' => false]` |
+
+> [!WARNING]
+> `style: percent` multiplica o valor por 100 — passe `0.125` para exibir `12,5%`.
+
+### Formato dinâmico (Closure)
+
+`->format()` também aceita Closure. Em colunas e entries, o Filament injeta `$record`/`$state`:
+
+```php
+OdometerColumn::make('saldo')
+    ->format(fn (Conta $record): array => [
+        'style' => 'currency',
+        'currency' => $record->moeda, // BRL, USD, EUR...
+    ]),
 ```
 
 ### Velocidade da animação
@@ -211,6 +240,26 @@ Todos os componentes aceitam `->duration()` (driver number-flow; quanto maior, m
 OdometerStat::make('Receita', $total)
     ->duration(2000), // conta em câmera lenta ✨
 ```
+
+### Driver `odometer`
+
+No driver secundário, `->format()` recebe a string `data-format` do odometer.js:
+
+```php
+OdometerColumn::make('receita')
+    ->format('(.ddd),dd'),
+```
+
+### Onde configurar cada opção do `number-flow`
+
+| Opção | Por componente | Global (plugin/config) | O que faz |
+|---|---|---|---|
+| `format` | `->format([...])` | `->format([...])` | Opções do Intl.NumberFormat (moeda, percentual, decimais…) |
+| `duration` | `->duration(ms)` | `->duration(ms)` | Velocidade da animação (padrão ~900ms) |
+| `locales` | — | `->locales('pt-BR')` | Idioma/separadores (`1.000,00`) |
+| `delay` | — | `->delay(ms)` | Espera antes da animação inicial 0 → valor (padrão 500ms) |
+
+O valor por componente sempre vence o global. A facade `FilamentOdometerEasy::renderNumberFlow()` aceita todas as opções por chamada (`format`, `delay`, `duration`).
 
 Referências: [opções do Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options) · [format do odometer](https://github.com/HubSpot/odometer#api).
 

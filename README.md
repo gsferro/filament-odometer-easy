@@ -16,7 +16,7 @@
 
 # Filament Odometer Easy
 
-> 🇧🇷 Português · 🇺🇸 [English](README.en.md)
+> 🇧🇷 Português · 🇺🇸 [English](https://github.com/gsferro/filament-odometer-easy/blob/main/README.en.md)
 
 Contadores animados para o **Filament v3, v4 e v5** — tabelas, infolists e widgets de estatísticas — do jeito mais simples possível: instale, registre o plugin e use.
 
@@ -353,23 +353,23 @@ composer test
 
 ## Changelog
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+Please see [CHANGELOG](https://github.com/gsferro/filament-odometer-easy/blob/main/CHANGELOG.md) for more information on what has changed recently.
 
 ## Contributing
 
-Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](https://github.com/gsferro/filament-odometer-easy/blob/main/.github/CONTRIBUTING.md) for details.
 
 ## Security Vulnerabilities
 
-Please review [our security policy](.github/SECURITY.md) on how to report security vulnerabilities.
+Please review [our security policy](https://github.com/gsferro/filament-odometer-easy/blob/main/.github/SECURITY.md) on how to report security vulnerabilities.
 
 ## Credits
 
 - [gsferro](https://github.com/gsferro)
 - [number-flow](https://github.com/barvian/number-flow) by Maxwell Barvian
 - [odometer.js](https://github.com/HubSpot/odometer) by HubSpot
-- [All Contributors](../../contributors)
+- [All Contributors](https://github.com/gsferro/filament-odometer-easy/graphs/contributors)
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). Please see [License File](https://github.com/gsferro/filament-odometer-easy/blob/main/LICENSE.md) for more information.

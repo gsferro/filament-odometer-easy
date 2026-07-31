@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="/art/logo.png" alt="filament-odometer-easy">
+    <img src="https://raw.githubusercontent.com/gsferro/filament-odometer-easy/main/art/logo.png" alt="filament-odometer-easy">
 </p>
 
 <p align="center">
@@ -26,15 +26,15 @@ It's the same effect as the **"Items found"** counter on the official [filamentp
 
 **`OdometerStat` on the dashboard** — with `poll`, the counters re-animate on their own every time the value updates:
 
-![OdometerStat with polling](/art/OdometerStat.gif)
+![OdometerStat with polling](https://raw.githubusercontent.com/gsferro/filament-odometer-easy/main/art/OdometerStat.gif)
 
 **`OdometerColumn` in tables** — animates on load, on sorting and on page change:
 
-![OdometerColumn in a table](/art/OdometerColumn.gif)
+![OdometerColumn in a table](https://raw.githubusercontent.com/gsferro/filament-odometer-easy/main/art/OdometerColumn.gif)
 
 **`OdometerEntry` in infolists and `OdometerNavigationBadge` in menus**:
 
-![OdometerEntry in an infolist and navigation badge](/art/odometer.gif)
+![OdometerEntry in an infolist and navigation badge](https://raw.githubusercontent.com/gsferro/filament-odometer-easy/main/art/odometer.gif)
 
 ## Components
 

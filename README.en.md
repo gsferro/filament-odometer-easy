@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/gsferro/filament-odometer-easy/main/art/logo.png" alt="filament-odometer-easy">
+    <img src="https://raw.githubusercontent.com/gsferro/filament-odometer-easy/main/art/logo-light.png" alt="filament-odometer-easy">
 </p>
 
 <p align="center">

@@ -2,7 +2,10 @@
 
 use Filament\Infolists\Infolist;
 use Filament\Schemas\Schema;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 use Gsferro\FilamentOdometerEasy\Facades\FilamentOdometerEasy;
+use Gsferro\FilamentOdometerEasy\FilamentOdometerEasyPlugin;
 use Gsferro\FilamentOdometerEasy\Infolists\Components\OdometerEntry;
 use Gsferro\FilamentOdometerEasy\Navigation\OdometerNavigationBadge;
 use Gsferro\FilamentOdometerEasy\Tables\Columns\OdometerColumn;
@@ -219,4 +222,47 @@ it('renders the stat value with the odometer driver', function () {
     expect($value->toHtml())
         ->toContain('data-value="10"')
         ->toContain('data-format="(,ddd).dd"');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Badge com a sidebar recolhida (badge-on-collapsed-sidebar)
+|--------------------------------------------------------------------------
+*/
+
+// HEAD_END nunca vem vazio — o hook da config global do number-flow também escreve nele.
+// O que se testa é a ausência do CSS, não a do hook.
+it('keeps the collapsed sidebar badge off by default', function () {
+    expect(config('filament-odometer-easy.badge-on-collapsed-sidebar'))->toBeFalse()
+        ->and((string) FilamentView::renderHook(PanelsRenderHook::HEAD_END))
+        ->not->toContain('.fi-sidebar-item-badge-ctn');
+});
+
+it('injects the collapsed sidebar badge styles when enabled', function () {
+    config(['filament-odometer-easy.badge-on-collapsed-sidebar' => true]);
+
+    expect((string) FilamentView::renderHook(PanelsRenderHook::HEAD_END))
+        ->toContain('.fi-main-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-badge-ctn')
+        ->toContain('display: flex !important')
+        ->toContain('@media (width >= 64rem)');
+});
+
+it('enables the collapsed sidebar badge fluently through the plugin', function () {
+    FilamentOdometerEasyPlugin::make()->badgeOnCollapsedSidebar();
+
+    expect(config('filament-odometer-easy.badge-on-collapsed-sidebar'))->toBeTrue();
+
+    FilamentOdometerEasyPlugin::make()->badgeOnCollapsedSidebar(false);
+
+    expect(config('filament-odometer-easy.badge-on-collapsed-sidebar'))->toBeFalse();
+});
+
+it('injects the collapsed sidebar badge styles on the odometer driver too', function () {
+    config([
+        'filament-odometer-easy.driver' => 'odometer',
+        'filament-odometer-easy.badge-on-collapsed-sidebar' => true,
+    ]);
+
+    expect((string) FilamentView::renderHook(PanelsRenderHook::HEAD_END))
+        ->toContain('.fi-sidebar-item-badge-ctn');
 });

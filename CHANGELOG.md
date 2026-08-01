@@ -2,6 +2,27 @@
 
 All notable changes to `filament-odometer-easy` will be documented in this file.
 
+## v1.2.0 - 2026-08-01
+
+### Badge de navegação visível com a sidebar recolhida 📌
+
+Com `->sidebarCollapsibleOnDesktop()`, o Filament escondia o badge de contagem assim que o menu recolhia — o container carrega `x-show="$store.sidebar.isOpen"` e ganha `display:none` inline. A contagem sumia justamente no modo em que só há ícone.
+
+Agora dá para mantê-la, no mesmo formato flutuante que o Filament já usa no gatilho de filtros da tabela:
+
+```php
+FilamentOdometerEasyPlugin::make()
+    ->badgeOnCollapsedSidebar(),
+```
+
+- **Opt-in** (`badge-on-collapsed-sidebar`, padrão `false`): atualizar a versão não muda a aparência do menu de quem não pediu
+- Só CSS — nenhuma view do Filament publicada, nenhum JavaScript. Injetado inline no `<head>` por render hook (~600 bytes), então **não** passa a exigir `php artisan filament:assets`
+- Vale para os **dois drivers**: é posicionamento do badge do Filament, não do contador
+- Com a sidebar aberta, o comportamento nativo é preservado — a regra vive dentro de `@media (width >= 64rem)` e é escopada em `.fi-main-sidebar:not(.fi-sidebar-open)`
+- Modo claro, modo escuro e RTL
+
+**Limite conhecido**: a folga à direita do item é de ~16px (`.fi-sidebar-nav` é `overflow-x:hidden`), então contagens de 5+ dígitos podem perder 1-2px na borda. Saída: `->format(['notation' => 'compact'])`.
+
 ## v1.1.1 - 2026-07-29
 
 ### Correções de CI 💚

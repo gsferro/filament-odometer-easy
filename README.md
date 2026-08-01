@@ -36,6 +36,12 @@ Contadores animados para o **Filament v3, v4 e v5** — tabelas, infolists e wid
 
 ![OdometerEntry em infolist e navigation badge](https://raw.githubusercontent.com/gsferro/filament-odometer-easy/main/art/odometer.gif)
 
+**Badge visível com a sidebar recolhida** — o Filament esconde o badge quando o menu recolhe; com `->badgeOnCollapsedSidebar()` ele passa a flutuar no canto do ícone, no mesmo formato do botão de filtros da tabela:
+
+| Claro | Escuro |
+|---|---|
+| ![Badge na sidebar recolhida](https://raw.githubusercontent.com/gsferro/filament-odometer-easy/main/art/OdometerNavigationBadgeCollapsed.gif) | ![Badge na sidebar recolhida, modo escuro](https://raw.githubusercontent.com/gsferro/filament-odometer-easy/main/art/OdometerNavigationBadgeCollapsedDark.gif) |
+
 ## Componentes
 
 | Componente | Estende | Uso |
@@ -43,7 +49,7 @@ Contadores animados para o **Filament v3, v4 e v5** — tabelas, infolists e wid
 | `OdometerColumn` | `TextColumn` | Colunas de tabela |
 | `OdometerEntry` | `TextEntry` | Entries de infolist |
 | `OdometerStat` | `Stat` | Counts no `StatsOverviewWidget` |
-| `OdometerNavigationBadge` | — | Badge de navegação (`getNavigationBadge()`) |
+| `OdometerNavigationBadge` | — | Badge de navegação (`getNavigationBadge()`) — com opção de continuar visível com a **sidebar recolhida** |
 | Facade `FilamentOdometerEasy` | — | Qualquer view/blade customizado |
 
 Todos herdam **100% da API do componente base** (`sortable`, `searchable`, `label`, `description`, `color` etc.) — só o valor passa a ser animado.
@@ -173,6 +179,37 @@ do `number-flow` (`locales`, `format`, `delay`, `duration`).
 > Disponível apenas no driver `number-flow`. No driver `odometer`,
 > o valor é exibido como texto puro, sem animação.
 
+#### Mantendo o badge visível com a sidebar recolhida
+
+Com `->sidebarCollapsibleOnDesktop()` no painel, o Filament **esconde** o badge assim que a
+sidebar recolhe: o container carrega `x-show="$store.sidebar.isOpen"` e ganha `display:none`
+inline. A contagem some justamente no modo em que só há ícone — o modo com menos informação.
+
+Ligue a opção no plugin:
+
+```php
+FilamentOdometerEasyPlugin::make()
+    ->badgeOnCollapsedSidebar(),
+```
+
+O badge passa a flutuar no canto superior direito do ícone, com fundo sólido recortando a borda —
+exatamente o formato que o Filament já usa no gatilho de filtros da tabela. **Com a sidebar aberta,
+nada muda**: o layout nativo (badge em linha, à direita do rótulo) é preservado.
+
+- ✅ Só CSS — nenhuma view do Filament publicada, nenhum JavaScript
+- ✅ Inline no `<head>` (~600 bytes) — **não** exige `php artisan filament:assets`
+- ✅ Vale para os **dois drivers**: é posicionamento do badge do Filament, não do contador
+- ✅ Modo claro e escuro, e RTL
+
+> [!IMPORTANT]
+> **Opt-in.** Fica desligado por padrão para que atualizar a versão não mude a aparência do menu
+> de quem não pediu. Para ligar via config: `'badge-on-collapsed-sidebar' => true`.
+
+> [!TIP]
+> A folga à direita do item é de ~16px, então contagens de 5+ dígitos podem perder 1-2px na borda
+> (`.fi-sidebar-nav` é `overflow-x:hidden`). Se for o seu caso, use notação compacta:
+> `->format(['notation' => 'compact'])` — 12.345 vira `12K`.
+
 ### Em qualquer view (facade)
 
 ```php
@@ -272,7 +309,8 @@ FilamentOdometerEasyPlugin::make()
     ->locales('pt-BR')                                      // number-flow: 1.000,00
     ->format(['style' => 'currency', 'currency' => 'BRL'])  // padrão global
     ->delay(500)                                            // ms antes da animação inicial (0 → valor)
-    ->duration(1500),                                       // velocidade da animação em ms (padrão ~900ms)
+    ->duration(1500)                                        // velocidade da animação em ms (padrão ~900ms)
+    ->badgeOnCollapsedSidebar(),                            // badge do menu visível com a sidebar recolhida
 ```
 
 Para usar o motor clássico:
@@ -295,6 +333,9 @@ php artisan vendor:publish --tag="filament-odometer-easy-config"
 return [
     // number-flow (padrão) | odometer
     'driver' => 'number-flow',
+
+    // mantém o navigation badge visível com a sidebar recolhida no desktop
+    'badge-on-collapsed-sidebar' => false,
 
     'number-flow' => [
         'locales' => null,  // ex.: 'pt-BR'; null usa o locale do navegador
@@ -331,6 +372,13 @@ return [
   o bundle detecta o marcador no `.fi-badge-label`, troca o texto por um `<number-flow>`
   e usa a config global exposta em `window.filamentOdometerEasy` por render hook.
   Quando o Livewire re-renderiza o badge, a animação parte do valor anterior (`data-start`).
+- **Badge com a sidebar recolhida**: não há prop, config nem render hook por item no Filament
+  para isso, e publicar a view `sidebar.item` congelaria 150 linhas de Blade a cada upgrade. O
+  pacote injeta um `<style>` no `<head>` por render hook, escopado em
+  `.fi-main-sidebar:not(.fi-sidebar-open)` — o próprio Filament já expõe o estado da sidebar como
+  classe (`fi-sidebar-open`) e o item de menu já é `position: relative`. O `display: flex
+  !important` é o que vence a declaração inline que o `x-show` do Alpine escreve. Só dentro de
+  `@media (width >= 64rem)`, o mesmo breakpoint do store do Alpine do Filament.
 - **odometer**: os assets (tema css, `odometer.js`, `odometer-easy.js`) são servidos
   direto do vendor do `gsferro/odometer-easy` via `FilamentAsset`, e o jQuery é injetado
   por render hook no `<head>` dos painéis.

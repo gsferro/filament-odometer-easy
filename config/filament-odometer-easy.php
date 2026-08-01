@@ -25,6 +25,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Badge com a sidebar recolhida
+    |--------------------------------------------------------------------------
+    |
+    | Com "->sidebarCollapsibleOnDesktop()", o Filament esconde o badge de
+    | navegação quando a sidebar recolhe: o container carrega
+    | x-show="$store.sidebar.isOpen" e ganha display:none inline. A contagem
+    | some justamente no modo em que só há ícone.
+    |
+    | Ligando aqui (ou com ->badgeOnCollapsedSidebar() no plugin), o pacote
+    | injeta um CSS que faz o badge flutuar no canto do ícone — o mesmo formato
+    | que o Filament já usa no botão de filtros da tabela. Com a sidebar aberta
+    | o comportamento nativo é preservado.
+    |
+    | Opt-in porque muda a aparência do menu de quem só atualizou a versão.
+    | Vale para os dois drivers: é posicionamento do badge, não do contador.
+    |
+    */
+
+    'badge-on-collapsed-sidebar' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | number-flow
     |--------------------------------------------------------------------------
     |

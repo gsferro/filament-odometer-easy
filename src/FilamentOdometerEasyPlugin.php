@@ -33,6 +33,20 @@ class FilamentOdometerEasyPlugin implements Plugin
     }
 
     /**
+     * Mantém o navigation badge visível quando a sidebar está recolhida no desktop
+     * (`->sidebarCollapsibleOnDesktop()`), no formato flutuante que o Filament já usa no
+     * gatilho de filtros da tabela. Com a sidebar aberta, nada muda.
+     *
+     * Opt-in porque altera a aparência do menu de quem só atualizou a versão.
+     */
+    public function badgeOnCollapsedSidebar(bool $enabled = true): static
+    {
+        config(['filament-odometer-easy.badge-on-collapsed-sidebar' => $enabled]);
+
+        return $this;
+    }
+
+    /**
      * Locale de formatação do number-flow (ex.: 'pt-BR' => 1.000,00).
      */
     public function locales(?string $locales): static

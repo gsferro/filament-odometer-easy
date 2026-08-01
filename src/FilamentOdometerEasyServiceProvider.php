@@ -58,6 +58,10 @@ class FilamentOdometerEasyServiceProvider extends PackageServiceProvider
         // passam por blade view do pacote.
         $this->registerNumberFlowConfigRenderHook();
 
+        // Opt-in: mantém o navigation badge visível quando a sidebar está
+        // recolhida no desktop (->sidebarCollapsibleOnDesktop()).
+        $this->registerSidebarBadgeRenderHook();
+
         // Testing
         Testable::mixin(new TestsFilamentOdometerEasy);
     }
@@ -138,6 +142,29 @@ class FilamentOdometerEasyServiceProvider extends PackageServiceProvider
                 ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 
                 return "<script>window.filamentOdometerEasy = {$config};</script>";
+            }
+        );
+    }
+
+    /**
+     * CSS que mantém o navigation badge visível com a sidebar recolhida no desktop.
+     *
+     * Inline por render hook, e não asset do FilamentAsset: são ~600 bytes e assim o recurso
+     * não obriga o consumidor a rodar `php artisan filament:assets` a cada deploy. Vale para
+     * os dois drivers — é posicionamento do badge do Filament, não do contador.
+     */
+    protected function registerSidebarBadgeRenderHook(): void
+    {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            function (): string {
+                // Avaliado apenas na renderização, para respeitar overrides
+                // feitos via FilamentOdometerEasyPlugin depois do boot.
+                if (! config('filament-odometer-easy.badge-on-collapsed-sidebar', false)) {
+                    return '';
+                }
+
+                return view(static::$viewNamespace . '::sidebar-badge')->render();
             }
         );
     }

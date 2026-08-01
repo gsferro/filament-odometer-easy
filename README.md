@@ -185,12 +185,31 @@ Com `->sidebarCollapsibleOnDesktop()` no painel, o Filament **esconde** o badge 
 sidebar recolhe: o container carrega `x-show="$store.sidebar.isOpen"` e ganha `display:none`
 inline. A contagem some justamente no modo em que só há ícone — o modo com menos informação.
 
-Ligue a opção no plugin:
+A opção vive **no plugin, dentro do seu Panel Provider** — e depende de o painel ter a sidebar
+recolhível, que é o estado que ela cobre:
 
 ```php
-FilamentOdometerEasyPlugin::make()
-    ->badgeOnCollapsedSidebar(),
+// app/Providers/Filament/AdminPanelProvider.php
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->id('admin')
+        ->path('admin')
+        // 1. pré-requisito: sem sidebar recolhível não existe o estado a corrigir
+        ->sidebarCollapsibleOnDesktop()
+        ->plugin(
+            FilamentOdometerEasyPlugin::make()
+                // 2. mantém o badge visível quando ela recolhe
+                ->badgeOnCollapsedSidebar()
+        );
+}
 ```
+
+> [!WARNING]
+> Sem `->sidebarCollapsibleOnDesktop()` (ou `->sidebarFullyCollapsibleOnDesktop()`) no painel, a
+> opção não faz nada: o Filament nunca entra no estado recolhido, e o CSS só age em
+> `.fi-main-sidebar:not(.fi-sidebar-open)`.
 
 O badge passa a flutuar no canto superior direito do ícone, com fundo sólido recortando a borda —
 exatamente o formato que o Filament já usa no gatilho de filtros da tabela. **Com a sidebar aberta,
@@ -398,6 +417,13 @@ npm run build
 ```bash
 composer test
 ```
+
+## Veja também
+
+**[gsferro/filament-stat-plus-easy](https://github.com/gsferro/filament-stat-plus-easy)** — cards de
+stat com ícone no canto e borda de acento colorida, para Filament v3, v4 e v5. O `StatPlus` estende o
+`OdometerStat` deste pacote, então o contador animado vem junto — mais o skeleton de carregamento
+combinando.
 
 ## Changelog
 

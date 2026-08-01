@@ -186,12 +186,31 @@ sidebar collapses: the container carries `x-show="$store.sidebar.isOpen"` and ge
 `display:none`. The count disappears exactly in the mode where only the icon is left — the mode
 with the least information.
 
-Turn it on from the plugin:
+The option lives **on the plugin, inside your Panel Provider** — and it depends on the panel having a
+collapsible sidebar, which is the state it covers:
 
 ```php
-FilamentOdometerEasyPlugin::make()
-    ->badgeOnCollapsedSidebar(),
+// app/Providers/Filament/AdminPanelProvider.php
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->id('admin')
+        ->path('admin')
+        // 1. prerequisite: without a collapsible sidebar there is no state to fix
+        ->sidebarCollapsibleOnDesktop()
+        ->plugin(
+            FilamentOdometerEasyPlugin::make()
+                // 2. keeps the badge visible once it collapses
+                ->badgeOnCollapsedSidebar()
+        );
+}
 ```
+
+> [!WARNING]
+> Without `->sidebarCollapsibleOnDesktop()` (or `->sidebarFullyCollapsibleOnDesktop()`) on the panel,
+> the option does nothing: Filament never enters the collapsed state, and the CSS only applies to
+> `.fi-main-sidebar:not(.fi-sidebar-open)`.
 
 The badge then floats on the icon's top-right corner, with a solid background cutting through the
 border — exactly the shape Filament already uses for the table filters trigger. **With the sidebar
@@ -399,6 +418,12 @@ npm run build
 ```bash
 composer test
 ```
+
+## See also
+
+**[gsferro/filament-stat-plus-easy](https://github.com/gsferro/filament-stat-plus-easy)** — stat cards
+with a corner icon and a colored accent border, for Filament v3, v4 and v5. `StatPlus` extends this
+package's `OdometerStat`, so the animated counter comes along — plus a matching loading skeleton.
 
 ## Changelog
 
